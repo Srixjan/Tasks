@@ -6,13 +6,13 @@ if principal < 0:
 
 intrest_rate = str(input("Enter the intrest rate(%): ")).strip().replace("%", "")
 intrest_rate = float(intrest_rate)
-if 0 < intrest_rate or intrest_rate > 30:
+if intrest_rate < 0 or intrest_rate > 30:
     print("Error, Please try again")
     exit()
     
 loan_term = str(input("Enter the tenure(years): "))
 loan_term = int(loan_term)
-if 1 < loan_term or loan_term > 50:
+if loan_term < 1 or loan_term > 50:
     print("Error, Please try again")
     exit()
 
