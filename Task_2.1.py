@@ -16,9 +16,9 @@ except InvalidScoreError as e:
 else:
     if marks >= 90 and marks <= 100:
         print("A")
-    elif marks >= 75 and marks < 89:
+    elif marks >= 75 and marks <= 89:
         print("B")
-    elif marks > 50 and marks < 74:
+    elif marks >= 50 and marks <=74:
         print("C")
     else:
         print("F")
