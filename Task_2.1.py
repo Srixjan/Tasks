@@ -1,17 +1,24 @@
 class InvalidScoreError(Exception):
-    """Value is Invalid as it doenst confines between 0 and 100"""
+    """Marks should be between 0 and 100 bitch"""
     pass
 
 try:
-    grade_score = input("Enter the grade score: ")
-    grade_score = int(grade_score)
+    marks = input("Enter the marks needed: ")
+    marks = int(marks)
+    if(marks < 0 or marks > 100):
+        raise InvalidScoreError("Marks should lie within 0 and 100") # this raise wont work, if i commit out the except invalid block because raise searches for  the except block.
 
 except ValueError:
-    print("Value must contain numbers!")
+    print("Value must be in numbers!!")
 
+except InvalidScoreError as e:
+    print(e)
 else:
-    if (grade_score < 0 or grade_score > 100):
-        raise InvalidScoreError(f"ERROR")
-    exit()
-    
-print(f"{grade_score}")
+    if marks >= 90 and marks <= 100:
+        print("A")
+    elif marks >= 75 and marks < 89:
+        print("B")
+    elif marks > 50 and marks < 74:
+        print("C")
+    else:
+        print("F")
