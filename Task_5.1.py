@@ -13,9 +13,9 @@ def read_log_entries(filepath: str) -> list:
 def delete_log_file(filepath: str) -> bool: 
     if os.path.exists(filepath):
         os.remove(filepath)
-        True
+        return True
     else:
-        False
+        return False
 
 def main():
     log_path = "pipeline.log"
