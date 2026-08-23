@@ -1,0 +1,25 @@
+# Datasets - never commit raw data, download separately or document source
+data/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+*.layout
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Logs
+*.log
+
+# OS/editor cruft
+.DS_Store
+.vscode/
