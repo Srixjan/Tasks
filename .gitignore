@@ -6,6 +6,9 @@ data/
 *.ipynb_checkpoints
 *.layout
 
+# Anaconda
+anaconda_projects/
+
 # Python
 __pycache__/
 *.pyc
