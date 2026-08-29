@@ -55,6 +55,10 @@ if __name__ == "__main__":
     al = al.drop(columns=["sr_no"])
     ws = ws.drop(columns=["sr_no"])
     wc = wc.drop(columns=["sr_no", "image"])
+ 
+    al["honble_members_of_parliaments"] = al["honble_members_of_parliaments"].apply(mp_name_clean)
+    ws["honble_members_of_parliament"] = ws["honble_members_of_parliament"].apply(mp_name_clean)
+    wc["honble_members_of_parliament"] = wc["honble_members_of_parliament"].apply(mp_name_clean)
 
     al_set = set(al["honble_members_of_parliaments"].unique())
     ws_set = set(ws["honble_members_of_parliament"].unique())
@@ -78,10 +82,6 @@ if __name__ == "__main__":
 
     if completed_match_rate < 0.90:
         logging.warning(f"Low match rate in Completed! Sample of unmatched names: {list(wc_set - al_set)[:15]}")
-
-    al["honble_members_of_parliaments"] = al["honble_members_of_parliaments"].apply(mp_name_clean)
-    ws["honble_members_of_parliament"] = ws["honble_members_of_parliament"].apply(mp_name_clean)
-    wc["honble_members_of_parliament"] = wc["honble_members_of_parliament"].apply(mp_name_clean)
 
     diagnose_dataframe(al, "Allocated Limit (cleaned)")
     diagnose_dataframe(ws, "Works Sanctioned (cleaned)")
