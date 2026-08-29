@@ -81,6 +81,13 @@ def drop_duplicate_rows(df: pd.DataFrame, name: str) -> pd.DataFrame:
     return df
 
 
+def mp_name_clean(raw_name: str) -> str:
+    cleaned_name = re.sub(r"^(Shri|Smt|Dr\.|Er\.)\s*", "", raw_name).upper()
+    return cleaned_name
+
+# al2 = al.copy()
+# al2["honble_members_of_parliaments"] = al2["honble_members_of_parliaments"].apply(normalize_mp_name)
+
 if __name__ == "__main__":
     try:
         al = load_results("data/raw/Allocated Limit for Honble MPs.csv")
@@ -153,6 +160,33 @@ if __name__ == "__main__":
     al = al.drop(columns=["sr_no"])
     ws = ws.drop(columns=["sr_no"])
     wc = wc.drop(columns=["sr_no", "image"])
+
+    al_set = set(al["honble_members_of_parliaments"].unique())
+    ws_set = set(ws["honble_members_of_parliament"].unique())
+    wc_set = set(wc["honble_members_of_parliament"].unique())
+
+    ws_matches = ws_set.intersection(al_set)
+    wc_matches = wc_set.intersection(al_set)
+
+    sanctioned_match_rate = len(ws_matches) / len(ws_set) if ws_set else 0.0
+    completed_match_rate = len(wc_matches) / len(wc_set) if wc_set else 0.0
+
+    logging.info("--- Overlap Summary ---")
+    logging.info(f"Sanctioned: {len(ws_matches)} names match Allocated out of {len(ws_set)} total.")
+    logging.info(f"Sanctioned Match Rate: {sanctioned_match_rate:.2%}")
+
+    logging.info(f"Completed: {len(wc_matches)} names match Allocated out of {len(wc_set)} total.")
+    logging.info(f"Completed Match Rate: {completed_match_rate:.2%}")
+
+    if sanctioned_match_rate < 0.90:
+        logging.warning(f"Low match rate in Sanctioned! Sample of unmatched names: {list(ws_set - al_set)[:15]}")
+
+    if completed_match_rate < 0.90:
+        logging.warning(f"Low match rate in Completed! Sample of unmatched names: {list(wc_set - al_set)[:15]}")
+
+    al["honble_members_of_parliaments"] = al["honble_members_of_parliaments"].apply(mp_name_clean)
+    ws["honble_members_of_parliament"] = ws["honble_members_of_parliament"].apply(mp_name_clean)
+    wc["honble_members_of_parliament"] = wc["honble_members_of_parliament"].apply(mp_name_clean)
 
     diagnose_dataframe(al, "Allocated Limit (cleaned)")
     diagnose_dataframe(ws, "Works Sanctioned (cleaned)")
