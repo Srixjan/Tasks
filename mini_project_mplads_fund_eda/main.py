@@ -1,9 +1,12 @@
 import logging
+import pandas as pd
 logging.basicConfig(level=logging.INFO)
 
 from src.data_pipeline import FileMissingValueError, FileValidationError
 
 from src.data_pipeline import diagnose_dataframe, load_results
+
+from src.analysis import grouping_by_mps
 
 from src.data_pipeline import (
     clean_dataframe_columns,
@@ -86,3 +89,29 @@ if __name__ == "__main__":
     diagnose_dataframe(al, "Allocated Limit (cleaned)")
     diagnose_dataframe(ws, "Works Sanctioned (cleaned)")
     diagnose_dataframe(wc, "Works Completed (cleaned)")
+
+    test_ws = grouping_by_mps(ws, "honble_members_of_parliament", "sanction_amount")
+test_wc = grouping_by_mps(wc, "honble_members_of_parliament", "amount_disbursed")
+
+test_wc.rename(columns={"total_sanction_amount": "total_amount_disbursed"}, inplace=True)
+al.rename(columns={"honble_members_of_parliaments": "honble_members_of_parliament"}, inplace=True)
+
+step_1 = pd.merge(al, test_ws, on="honble_members_of_parliament", how="left")
+final_merged = pd.merge(step_1, test_wc, on="honble_members_of_parliament", how="left")
+
+final_merged = final_merged.rename(columns={
+    "sanction_work_count_x": "sanctioned_work_count",
+    "sanction_work_count_y": "completed_work_count",
+    "total_amount_disbursed": "total_disbursed_amount"
+})
+
+cols_to_fill = ["total_sanction_amount", "sanctioned_work_count", "total_disbursed_amount", "completed_work_count"]
+final_merged[cols_to_fill] = final_merged[cols_to_fill].fillna(0)
+
+logging.info(f"Final merged shape: {final_merged.shape}")
+
+zero_activity = final_merged[(final_merged["sanctioned_work_count"] == 0) & (final_merged["completed_work_count"] == 0)]
+logging.info(f"MPs with zero sanctioned and zero completed works: {len(zero_activity)}")
+
+orphans = final_merged[(final_merged["sanctioned_work_count"] == 0) & (final_merged["completed_work_count"] > 0)]
+logging.info(f"MPs with completed works but zero matching sanctions: {len(orphans)}")
