@@ -28,6 +28,10 @@ if __name__ == "__main__":
         logging.error(f"Loading Failed: {e}")
         raise
 
+    al = al.iloc[:-1]
+    ws = ws.iloc[:-1]
+    wc = wc.iloc[:-1]
+
     al = clean_dataframe_columns(al)
     wc = clean_dataframe_columns(wc)
     ws = clean_dataframe_columns(ws)
