@@ -7,6 +7,8 @@ from src.data_pipeline import FileMissingValueError, FileValidationError
 
 from src.data_pipeline import diagnose_dataframe, load_results
 
+from src.analysis import grouping_by_mps, run_task6_groupby_analysis
+
 from src.analysis import grouping_by_mps
 
 from src.data_pipeline import (
@@ -134,4 +136,17 @@ if __name__ == "__main__":
     logging.info(f"Zero-activity MPs: {df['has_no_activity'].sum()}")
     logging.info(f"Orphan-completion MPs: {df['has_orphan_completions'].sum()}")
 
+    state_summary, top_10_mps, bottom_10_mps, check = run_task6_groupby_analysis(df, ws, wc)
+
+    logging.info("--- State Summary (Top 5) ---")
+    logging.info(f"\n{state_summary.head(5)}")
+
+    logging.info("--- Top 10 MPs by Utilization ---")
+    logging.info(f"\n{top_10_mps[['honble_members_of_parliament','state','allocated_amount','utilization_rate']]}")
+
+    logging.info("--- Bottom 10 MPs by Utilization ---")
+    logging.info(f"\n{bottom_10_mps[['honble_members_of_parliament','state','allocated_amount','utilization_rate']]}")
+
+    logging.info("--- Category Gap Analysis ---")
+    logging.info(f"\n{check}")
 
