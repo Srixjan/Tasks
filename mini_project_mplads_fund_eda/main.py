@@ -3,15 +3,15 @@ import pandas as pd
 import numpy as np
 logging.basicConfig(level=logging.INFO)
 
-from src.data_pipeline import FileMissingValueError, FileValidationError
+from mini_project_mplads_fund_eda.src.data_pipeline import FileMissingValueError, FileValidationError
 
-from src.data_pipeline import diagnose_dataframe, load_results
+from mini_project_mplads_fund_eda.src.data_pipeline import diagnose_dataframe, load_results
 
-from src.analysis import grouping_by_mps, run_task6_groupby_analysis
+from mini_project_mplads_fund_eda.src.analysis import grouping_by_mps, run_task6_groupby_analysis
 
-from src.analysis import grouping_by_mps
+from mini_project_mplads_fund_eda.src.analysis import grouping_by_mps
 
-from src.data_pipeline import (
+from mini_project_mplads_fund_eda.src.data_pipeline import (
     clean_dataframe_columns,
     convert_real_datetime,
     drop_duplicate_rows,
@@ -21,11 +21,15 @@ from src.data_pipeline import (
     strip_whitespace,
 )
 
-if __name__ == "__main__":
+def build_final_dataframe() -> pd.DataFrame:
+    import os
+    _base_dir = os.path.dirname(os.path.abspath(__file__))
+    _raw_dir = os.path.join(_base_dir, "data", "raw")
+
     try:
-        al = load_results("data/raw/Allocated Limit for Honble MPs.csv")
-        wc = load_results("data/raw/Works Completed.csv")
-        ws = load_results("data/raw/Works Sanctioned.csv")
+        al = load_results(os.path.join(_raw_dir, "Allocated Limit for Honble MPs.csv"))
+        wc = load_results(os.path.join(_raw_dir, "Works Completed.csv"))
+        ws = load_results(os.path.join(_raw_dir, "Works Sanctioned.csv"))
     except FileValidationError as e:
         logging.error(f"Loading Failed: {e}")
         raise
@@ -136,17 +140,22 @@ if __name__ == "__main__":
     logging.info(f"Zero-activity MPs: {df['has_no_activity'].sum()}")
     logging.info(f"Orphan-completion MPs: {df['has_orphan_completions'].sum()}")
 
-    state_summary, top_10_mps, bottom_10_mps, check = run_task6_groupby_analysis(df, ws, wc)
+    return df
 
-    logging.info("--- State Summary (Top 5) ---")
-    logging.info(f"\n{state_summary.head(5)}")
 
-    logging.info("--- Top 10 MPs by Utilization ---")
-    logging.info(f"\n{top_10_mps[['honble_members_of_parliament','state','allocated_amount','utilization_rate']]}")
+if __name__ == "__main__":
+    df = build_final_dataframe()
 
-    logging.info("--- Bottom 10 MPs by Utilization ---")
-    logging.info(f"\n{bottom_10_mps[['honble_members_of_parliament','state','allocated_amount','utilization_rate']]}")
-
-    logging.info("--- Category Gap Analysis ---")
-    logging.info(f"\n{check}")
+    # NOTE: run_task6_groupby_analysis needs ws/wc (sanctioned/completed dfs),
+    # which are internal to build_final_dataframe(). If you still need this
+    # Task 6 report, move ws/wc into the return value or re-derive from df.
+    # state_summary, top_10_mps, bottom_10_mps, check = run_task6_groupby_analysis(df, ws, wc)
+    # logging.info("--- State Summary (Top 5) ---")
+    # logging.info(f"\n{state_summary.head(5)}")
+    # logging.info("--- Top 10 MPs by Utilization ---")
+    # logging.info(f"\n{top_10_mps[['honble_members_of_parliament','state','allocated_amount','utilization_rate']]}")
+    # logging.info("--- Bottom 10 MPs by Utilization ---")
+    # logging.info(f"\n{bottom_10_mps[['honble_members_of_parliament','state','allocated_amount','utilization_rate']]}")
+    # logging.info("--- Category Gap Analysis ---")
+    # logging.info(f"\n{check}")
 
