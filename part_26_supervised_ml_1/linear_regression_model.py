@@ -1,6 +1,7 @@
 from sklearn.datasets import fetch_california_housing
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression 
+from regression_evaluator import evaluate_regression, print_metrics_table
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 import pandas as pd
@@ -92,6 +93,10 @@ if __name__ == "__main__":
     
     pred_before = my_model.predict(X_test)
     logging.info(f"Prediction before save, first 5 {pred_before[:5]}")
+
+    metrics = evaluate_regression(y_test, pred_before, n_features=X_test.shape[1])
+    
+    print_metrics_table(metrics)
 
     my_model.save(CONFIG["model_path"])
 
