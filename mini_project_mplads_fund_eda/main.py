@@ -3,17 +3,15 @@ import pandas as pd
 import numpy as np
 logging.basicConfig(level=logging.INFO)
 
-from mini_project_mplads_fund_eda.src.data_pipeline import FileMissingValueError, FileValidationError
+from src.data_pipeline import FileMissingValueError, FileValidationError
 
-from mini_project_mplads_fund_eda.src.data_pipeline import diagnose_dataframe, load_results
+from src.data_pipeline import diagnose_dataframe, load_results
 
-from mini_project_mplads_fund_eda.src.analysis import grouping_by_mps, run_task6_groupby_analysis
-
-from mini_project_mplads_fund_eda.src.analysis import grouping_by_mps
+from src.analysis import grouping_by_mps, run_task6_groupby_analysis
 
 from src.risk_target import defined_completion_risk, MissingColumnError
 
-from mini_project_mplads_fund_eda.src.data_pipeline import (
+from src.data_pipeline import (
     clean_dataframe_columns,
     convert_real_datetime,
     drop_duplicate_rows,
