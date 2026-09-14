@@ -11,6 +11,8 @@ from mini_project_mplads_fund_eda.src.analysis import grouping_by_mps, run_task6
 
 from mini_project_mplads_fund_eda.src.analysis import grouping_by_mps
 
+from src.risk_target import defined_completion_risk, MissingColumnError
+
 from mini_project_mplads_fund_eda.src.data_pipeline import (
     clean_dataframe_columns,
     convert_real_datetime,
@@ -139,6 +141,9 @@ def build_final_dataframe() -> pd.DataFrame:
 
     logging.info(f"Zero-activity MPs: {df['has_no_activity'].sum()}")
     logging.info(f"Orphan-completion MPs: {df['has_orphan_completions'].sum()}")
+
+    df = defined_completion_risk(df, method="relative", group_col="state")
+    print(df["at_risk"].value_counts(normalize=True) * 100)
 
     return df
 
