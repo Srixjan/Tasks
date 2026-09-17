@@ -2,6 +2,7 @@ import logging
 import pandas as pd
 import numpy as np
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from src.data_pipeline import FileMissingValueError, FileValidationError
 
@@ -10,6 +11,8 @@ from src.data_pipeline import diagnose_dataframe, load_results
 from src.analysis import grouping_by_mps, run_task6_groupby_analysis
 
 from src.risk_target import defined_completion_risk, MissingColumnError
+
+from src.feature_pipeline import build_feature_pipeline
 
 from src.data_pipeline import (
     clean_dataframe_columns,
@@ -141,13 +144,52 @@ def build_final_dataframe() -> pd.DataFrame:
     logging.info(f"Orphan-completion MPs: {df['has_orphan_completions'].sum()}")
 
     df = defined_completion_risk(df, method="relative", group_col="state")
-    print(df["at_risk"].value_counts(normalize=True) * 100)
+    logger.info("--- Target Distribution ---")
+    logger.info(f"\n{df['at_risk'].value_counts(normalize=True) * 100}")
+
+    # Clean data for feature engineering (done once, inside build_final_dataframe)
+    df["completion_ratio"] = df["completion_ratio"].fillna(0)
+    df["has_no_activity"] = df["has_no_activity"].astype(int)
+    df["has_orphan_completions"] = df["has_orphan_completions"].astype(int)
 
     return df
 
 
 if __name__ == "__main__":
+    # Load and merge all data sources
+    logger.info("Building final dataframe...")
     df = build_final_dataframe()
+    
+    # Define column structure
+    LEAKAGE_COLS = ["utilization_rate"]
+    ID_COLS = ["honble_members_of_parliament", "constituency"]
+    numeric_features = [
+        "allocated_amount", "total_sanction_amount", "sanctioned_work_count", 
+        "total_disbursed_amount", "completed_work_count", "sanctioned_backlog", 
+        "completion_ratio", "has_no_activity", "has_orphan_completions"
+    ]
+    categorical_features = ["state"]
+    
+    # Verify no nulls in feature columns
+    logger.info("Verifying null counts in feature set...")
+    null_check = df[numeric_features + categorical_features].isnull().sum()
+    logger.info(f"\n{null_check}")
+    
+    # Build and apply feature pipeline
+    logger.info("Building feature pipeline...")
+    feature_pipeline = build_feature_pipeline(numeric_features, categorical_features)
+    X = df[numeric_features + categorical_features]
+    X_transformed = feature_pipeline.fit_transform(X)
+    
+    # Extract target
+    y = df['at_risk']
+    
+    # Verify shapes
+    logger.info(f"Features shape: {X_transformed.shape}, Target shape: {y.shape}")
+    logger.info(f"Target value counts:\n{y.value_counts()}")
+    
+    # Ready for P2.3 (CompletionRiskModel)
+    logger.info("Data preparation complete. Ready for model training (P2.3).")
 
     # NOTE: run_task6_groupby_analysis needs ws/wc (sanctioned/completed dfs),
     # which are internal to build_final_dataframe(). If you still need this
@@ -161,4 +203,3 @@ if __name__ == "__main__":
     # logging.info(f"\n{bottom_10_mps[['honble_members_of_parliament','state','allocated_amount','utilization_rate']]}")
     # logging.info("--- Category Gap Analysis ---")
     # logging.info(f"\n{check}")
-
