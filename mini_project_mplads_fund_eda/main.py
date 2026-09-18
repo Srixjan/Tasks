@@ -193,15 +193,14 @@ if __name__ == "__main__":
     # Ready for P2.3 (CompletionRiskModel)
     logger.info("Data preparation complete. Ready for model training (P2.3).")
 
-    # NOTE: run_task6_groupby_analysis needs ws/wc (sanctioned/completed dfs),
-    # which are internal to build_final_dataframe(). If you still need this
-    # Task 6 report, move ws/wc into the return value or re-derive from df.
-    # state_summary, top_10_mps, bottom_10_mps, check = run_task6_groupby_analysis(df, ws, wc)
-    # logging.info("--- State Summary (Top 5) ---")
-    # logging.info(f"\n{state_summary.head(5)}")
-    # logging.info("--- Top 10 MPs by Utilization ---")
-    # logging.info(f"\n{top_10_mps[['honble_members_of_parliament','state','allocated_amount','utilization_rate']]}")
-    # logging.info("--- Bottom 10 MPs by Utilization ---")
-    # logging.info(f"\n{bottom_10_mps[['honble_members_of_parliament','state','allocated_amount','utilization_rate']]}")
-    # logging.info("--- Category Gap Analysis ---")
-    # logging.info(f"\n{check}")
+    model = CompletionRiskModel(model="logistic_regression")
+    model.train(df)
+
+    model.save("models/completion_risk_v1.pkl")
+    loaded_model = CompletionRiskModel.load("models/completion_risk_v1.pkl")
+
+    # Test loaded model
+    X_test = df.drop(columns=["at_risk"])
+    predictions = loaded_model.predict(X_test)
+    print(f"Generated {len(predictions)} predictions")
+    print(f"Sample predictions: {predictions[:10]}")
