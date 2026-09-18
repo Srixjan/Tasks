@@ -201,6 +201,9 @@ if __name__ == "__main__":
 
     # Test loaded model
     X_test = df.drop(columns=["at_risk"])
+    # Drop NaN rows (same as training)
+    mask = X_test.notna().all(axis=1)
+    X_test = X_test[mask]
     predictions = loaded_model.predict(X_test)
     print(f"Generated {len(predictions)} predictions")
     print(f"Sample predictions: {predictions[:10]}")

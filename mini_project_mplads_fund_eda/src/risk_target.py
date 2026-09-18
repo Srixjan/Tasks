@@ -13,6 +13,7 @@ def defined_completion_risk(df: pd.DataFrame, method: str, threshold: int=float,
         df["at_risk"] = (df["utilization_rate"] <= threshold).astype(int)
 
     elif(method == "relative"):
+        group_col = "state"
         group_medians = df.groupby(group_col)["utilization_rate"].transform("median")
         df["at_risk"] = (df["utilization_rate"] <= group_medians).astype(int)
         

@@ -64,11 +64,27 @@ class CompletionRiskModel:
     def train(self, df):
         rand_stat = self.config["random_state"]
         
-        target_df = defined_completion_risk(df)
+        target_df = defined_completion_risk(df, method="relative")
         y = target_df["at_risk"]
         X = target_df.drop(columns=["at_risk"])
 
-        pipeline = build_feature_pipeline()
+        # Drop rows with NaN values
+        mask = X.notna().all(axis=1)
+        X = X[mask]
+        y = y[mask]
+
+        numeric_features = [
+            "allocated_amount",
+            "total_sanction_amount",
+            "sanctioned_work_count",
+            "total_disbursed_amount",
+            "completed_work_count",
+            "sanctioned_backlog",
+            "completion_ratio"
+        ]
+        categorical_features = ["state"]
+
+        pipeline = build_feature_pipeline(numeric_features, categorical_features)
 
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.2, random_state=rand_stat, stratify=y
