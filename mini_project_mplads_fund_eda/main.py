@@ -14,6 +14,8 @@ from src.risk_target import defined_completion_risk, MissingColumnError
 
 from src.feature_pipeline import build_feature_pipeline
 
+from src.model import CompletionRiskModel
+
 from src.data_pipeline import (
     clean_dataframe_columns,
     convert_real_datetime,
