@@ -79,7 +79,7 @@ class CompletionRiskModel:
 
         logging.info(
             f"Training Complete. Model:{self.config['model_name']}."
-            f"Train accuracy -> {train_acc:.2f%}, Test accuracy -> {test_acc.2f%}"
+            f"Train accuracy -> {train_acc:.2f%}, Test accuracy -> {test_acc:.2f%}"
         )
 
         self.is_trained = True
