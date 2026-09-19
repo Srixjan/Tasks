@@ -16,6 +16,8 @@ from src.feature_pipeline import build_feature_pipeline
 
 from src.model import CompletionRiskModel
 
+from src.evaluation import evaluate_classifier
+
 from src.data_pipeline import (
     clean_dataframe_columns,
     convert_real_datetime,
@@ -194,16 +196,14 @@ if __name__ == "__main__":
     logger.info("Data preparation complete. Ready for model training (P2.3).")
 
     model = CompletionRiskModel(model="logistic_regression")
-    model.train(df)
+    X_test, y_test = model.train(df)
 
+    logger.info("Saving model...")
     model.save("models/completion_risk_v1.pkl")
+    
+    logger.info("Loading model...")
     loaded_model = CompletionRiskModel.load("models/completion_risk_v1.pkl")
 
-    # Test loaded model
-    X_test = df.drop(columns=["at_risk"])
-    # Drop NaN rows (same as training)
-    mask = X_test.notna().all(axis=1)
-    X_test = X_test[mask]
-    predictions = loaded_model.predict(X_test)
-    print(f"Generated {len(predictions)} predictions")
-    print(f"Sample predictions: {predictions[:10]}")
+    logger.info("Evaluating model...")
+    report = evaluate_classifier(model, X_test, y_test)
+    print(report)

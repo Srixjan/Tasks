@@ -107,6 +107,8 @@ class CompletionRiskModel:
 
         self.is_trained = True
 
+        return X_test, y_test
+
     def predict(self, X_fresh):
         if not self.is_trained or self.pipeline is None:
             raise ModelNotTrainedError(f"Model has not been trained yet....")
@@ -116,6 +118,16 @@ class CompletionRiskModel:
         predictions = self.classifier.predict(X_fresh_trans)
 
         return list(predictions)
+
+    def predict_proba(self, X_fresh):
+        if not self.is_trained or self.pipeline is None:
+            raise ModelNotTrainedError(f"Model has not been trained yet....")
+
+        X_fresh_trans = self.pipeline.transform(X_fresh)
+
+        probabilities = self.classifier.predict_proba(X_fresh_trans)
+
+        return probabilities
 
     def save(self, filepath):
         if not self.is_trained:
