@@ -11,7 +11,7 @@ from sklearn.metrics import accuracy_score
 
 config = {
     "max_depth": 5,
-    "random_state": 42,
+    "random_stfate": 42,
     "cv_folds": 15,
     "max_depth_values": [3, 5, 8, 12, 15, 20]
 }
