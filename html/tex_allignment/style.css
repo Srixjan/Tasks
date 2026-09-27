@@ -1,0 +1,25 @@
+h1 {
+    text-align: center;
+    text-decoration: black  wavy underline;
+    /* text-decoration: black overline; */ 
+    letter-spacing: 2px;
+    font-family: fantasy;
+}
+
+h3 {
+    text-align: start;
+}
+
+p {
+    text-align: justify;
+    font-weight: 400;
+    line-height: 1.10;
+}
+ 
+h2 {
+    font-weight: normal;
+}
+
+a {
+    text-decoration: none;
+}
