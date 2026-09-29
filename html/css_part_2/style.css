@@ -1,0 +1,91 @@
+/* Selectors */
+* { 
+    font-family: 'Courier New', Courier, monospace ;
+    /* This is called an Universal Selector */
+}
+
+h3 {
+    color: green; 
+}
+
+h1 {
+    color: yellow;
+    background-color: black;
+}
+
+/* This is called a ID selector */
+#login {
+    background-color: black;
+    color: yellow;
+}
+
+#signup {
+    background-color: green;
+    color: yellow;
+}
+
+/* This is called a class selector */
+.upvote {
+    background-color: black;
+    color: yellow;
+}
+
+/* descendant selector */
+p a {
+    background-color: red;
+    color: blue;
+}
+
+/* this is 4 levels  */
+nav ul li a {
+    color: yellow;
+    background-color: black;
+}
+
+/* Sibling combinator */
+p + h3 {
+    text-decoration: underline;
+}
+
+.upvote + button {
+    background-color: green;
+    color: yellow;
+}
+
+/* Child Combinator */
+
+div > input {
+    background-color: black;
+    color: yellow;
+}
+
+/* attribute selector */
+
+input[type="text"] {
+    color: pink;
+}
+
+input[type="password"] {
+    color: pink;
+}
+
+/* pseudo class */
+
+button:hover {
+    background-color: green;
+    color: yellow;
+}
+
+h3:hover {
+    text-decoration: none;
+}
+
+/* active class */
+button:active {
+    background-color: pink;
+}
+
+p:active {
+    font-weight: bold;
+    color: yellow;
+}
