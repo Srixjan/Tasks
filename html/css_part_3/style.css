@@ -1,0 +1,41 @@
+*{
+    padding: 0px;
+    margin: 0px;
+    background-color: red;
+}
+
+div {
+    width: 300px;
+    height: 250px;
+    background-color: black;
+    color: yellow;
+    /* border-width: 1.5px;
+    border-style: dashed; */
+
+    border: 1.5px dashed yellow;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin:10px;
+}
+
+h1 {
+    border-width: 2px;
+    border-style: dotted;
+    background-color: black;
+    color: yellow;
+    border-bottom-color: aqua;
+    border-radius: 10px;
+    padding-left: 5px;
+    padding-bottom: 5px;
+    padding-bottom: 5px;
+}
+
+button {
+    background-color: black;
+    color: yellow;
+    margin-top: 10px;
+    height: 30px;
+    border: 2px solid yellow;
+    border-radius: 10px;
+}
