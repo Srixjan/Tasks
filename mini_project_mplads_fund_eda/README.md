@@ -1,54 +1,107 @@
-# Task 7 — Findings: MPLADS Fund Utilization EDA
+# MPLADS Fund Intelligence & Completion Risk Platform
 
-## Research Question
-Which Members of Parliament and states convert their sanctioned MPLADS funds into
-completed work most efficiently, and where does the money tend to get stuck?
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white)](https://vercel.com/)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 
-## State-Level Findings
-Averaging utilization rate by state shows Nagaland at the top (~0.60), but this is
-based on a very small number of MPs from that state, so it's not a statistically
-robust finding — more a data point to note than a strong conclusion. Excluding
-small-sample states, Mizoram, Sikkim, and Manipur also rank highly. At the bottom,
-several states (Andaman and Nicobar Islands, Lakshadweep, Ladakh, The Dadra and
-Nagar Haveli and Daman and Diu) show 0.0 average utilization — meaning the MPs
-representing these regions in this dataset show no disbursed funds at all.
+An end-to-end data analytics and machine learning platform that analyzes the conversion of sanctioned government development funds into completed works under the **Member of Parliament Local Area Development Scheme (MPLADS)** across 543 parliamentary constituencies in India.
 
-## MP-Level Findings
-After filtering to MPs with allocated amounts above ₹1.47 crore (to avoid small
-allocations producing misleadingly perfect utilization ratios), the top-performing
-MP, Dr. Rajesh Mishra (Madhya Pradesh), converts only 45% of allocated funds into
-disbursed work. This is a meaningful finding on its own: even the best-performing,
-high-allocation MP in the dataset is far from fully utilizing available funds.
-At the other end, several MPs with allocations above ₹1.47 crore show 0% utilization —
-meaning none of their allocated funds have resulted in any disbursed, completed work
-based on this snapshot.
+---
 
-## Category-Level Findings
-Grouping the raw Works Sanctioned and Works Completed tables by work category
-(Normal/Others, Repair and Renovation, Trust and Society) produced an unexpected
-result: total disbursed amount exceeds total sanctioned amount in every single
-category, by roughly 2-3x. This is the inverse of what the MP-level and state-level
-analysis showed. This isn't a pipeline bug — it's the same root cause documented in
-Task 4: some completed works in this snapshot don't have a matching sanctioned
-record, because the sanctioned data reflects a different (rolling, multi-year)
-time window than the completed data. At the category level, this effect is large
-enough to flip the direction of the gap entirely.
+## 📌 Executive Summary
 
-## Data Limitations
-- 116 MPs show zero sanctioned and zero completed work activity in this dataset.
-- 217 MPs (~40%) show completed work with no matching sanctioned record ("orphan"
-  completions), consistent with the sanctioned/completed tables being multi-year
-  rolling snapshots rather than a perfectly aligned point-in-time pair.
-- The category-level gap analysis inherits and amplifies this same limitation —
-  disbursed exceeds sanctioned in all three categories, which should not be read
-  as "no backlog exists," but as an artifact of snapshot misalignment.
-- One row with a blank `state` value and one row with a blank `work_category` value
-  were found and dropped before analysis.
-- A trailing total/summary row was found at the end of all three raw CSVs and
-  dropped during cleaning, as it was not a real data record.
+* **National Fund Pool**: Tracked across ₹8,315+ Crore in allocations.
+* **National Utilization**: Average fund conversion rate sits at **~9.0%** (Median: **~4.5%**).
+* **Completion Risk Model**: A Supervised ML Classifier (`scikit-learn`) engineered to identify at-risk constituencies based on relative state benchmarks, prioritizing **Recall (~81%)** for public fund accountability.
 
-## Next Steps
-This cleaned dataset, along with the engineered features (`utilization_rate`,
-`sanctioned_backlog`, `completion_ratio`), is now ready to feed into Phase 2 of
-the MPLADS Anomaly Detection Platform: a completion-risk classifier built during
-the Supervised ML section of the course.
+---
+
+## 🚀 Key Features
+
+1. **Executive KPI Dashboard**: Macro-level visibility over national allocations, released disbursements, unreleased backlogs, and state distributions.
+2. **State-Level Benchmarks**: Comparative leaderboard ranking all 36 Indian States and Union Territories with state-median benchmarking.
+3. **Interactive MP Directory**: Search, filter, and sort 543 Members of Parliament by utilization rate, constituency, backlog, and continuous risk probability.
+4. **Category Gap Analysis**: Deep-dive into fund allocation dynamics across *Normal/Others*, *Repair & Renovation*, and *Trust & Society*.
+5. **AI Risk Simulator**: Real-time constituency risk inference tool for policymakers with automatic diagnostic factor generation.
+
+---
+
+## 🛠 Tech Stack
+
+* **Backend & API**: Python, FastAPI, Uvicorn, Pydantic
+* **Machine Learning & Pipeline**: Scikit-Learn (`LogisticRegression`, `ColumnTransformer`, `SimpleImputer`, `OneHotEncoder`), Joblib, Pandas, NumPy
+* **Frontend**: HTML5, Vanilla JavaScript (Zero-framework, high-performance), Chart.js
+* **Styling**: Minimalist Zinc Dark Design System (Linear / Vercel style)
+* **Deployment**: Vercel Serverless (`@vercel/python`)
+
+---
+
+## 📊 Project Structure
+
+```
+├── data/
+│   ├── raw/                  # Raw government data CSVs
+│   └── processed/            # Pre-computed cached datasets (<10ms cold boot)
+├── models/
+│   └── completion_risk_v1.pkl # Serialized ML pipeline + trained model artifact
+├── src/
+│   ├── analysis.py           # State and category aggregation functions
+│   ├── data_pipeline.py      # Regex sanitization, numeric coercion, deduplication
+│   ├── feature_pipeline.py   # Scikit-learn ColumnTransformer with robust imputers
+│   ├── model.py              # CompletionRiskModel wrapper class
+│   ├── risk_target.py        # State-relative median target formulation
+│   └── evaluation.py         # Binary classification metrics & ROC-AUC analysis
+├── static/
+│   ├── index.html            # Minimalist Single-Page Application
+│   ├── style.css             # High-performance CSS design tokens
+│   └── app.js                # Asynchronous chart rendering & simulator logic
+├── app.py                    # FastAPI server & REST endpoints
+├── main.py                   # Model training and EDA execution script
+├── requirements.txt          # Production dependencies
+└── vercel.json               # Vercel deployment configuration
+```
+
+---
+
+## ⚙️ Local Development
+
+### 1. Clone & Setup
+```bash
+git clone https://github.com/Srixjan/MPLADS-Fund-Intelligence.git
+cd MPLADS-Fund-Intelligence
+```
+
+### 2. Create Virtual Environment
+```bash
+python -m venv venv
+# On Windows:
+.\venv\Scripts\activate
+# On Linux/macOS:
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Run Application
+```bash
+uvicorn app:app --host 127.0.0.1 --port 8000
+```
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
+
+---
+
+## 🌐 Deploy to Vercel
+
+1. Push this project to your GitHub repository.
+2. Sign in to [Vercel](https://vercel.com) and click **Add New Project**.
+3. Select your repository `MPLADS-Fund-Intelligence` and click **Deploy**.
+4. Vercel automatically detects `vercel.json` and provisions the live site with zero extra configuration.
+
+---
+
+## 📄 License
+This project is open-source under the MIT License.
