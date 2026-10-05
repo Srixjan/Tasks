@@ -4,7 +4,7 @@ class MissingColumnError(Exception):
     """Must be triggered if utilization rate column is missing"""
     pass
 
-def defined_completion_risk(df: pd.DataFrame, method: str, threshold: int=float, group_col: str = None):
+def defined_completion_risk(df: pd.DataFrame, method: str = "relative", threshold: float = 0.5, group_col: str = "state"):
     df = df.copy()
     if "utilization_rate" not in df.columns:
         raise MissingColumnError("Column utilization rate doesn't exist in the dataframe!")

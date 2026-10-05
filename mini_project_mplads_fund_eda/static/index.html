@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MPLADS Fund & Risk Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Top Header -->
+    <header class="header">
+      <div class="brand">
+        <h1>MPLADS Analytics</h1>
+        <span class="brand-badge">EDA & ML Risk Platform</span>
+      </div>
+      <div class="header-meta">
+        <span class="status-indicator">
+          <span class="status-dot"></span>
+          543 Constituencies Live
+        </span>
+        <button class="btn btn-secondary" id="btn-refresh" style="padding: 4px 10px; font-size: 0.78rem;">Refresh</button>
+      </div>
+    </header>
+
+    <!-- Segmented Tab Navigation -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="overview">Overview</button>
+      <button class="tab-btn" data-tab="states">States</button>
+      <button class="tab-btn" data-tab="mps">MP Directory</button>
+      <button class="tab-btn" data-tab="categories">Category Gap</button>
+      <button class="tab-btn" data-tab="simulator">Risk Simulator</button>
+    </nav>
+
+    <!-- TAB 1: OVERVIEW -->
+    <section id="tab-overview" class="tab-panel active">
+      <div class="kpi-grid">
+        <div class="kpi-box">
+          <div class="kpi-label">Allocated Amount</div>
+          <div class="kpi-value mono" id="kpi-allocated">₹--</div>
+          <div class="kpi-sub">National Parliamentary Fund</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Disbursed Amount</div>
+          <div class="kpi-value mono" id="kpi-disbursed">₹--</div>
+          <div class="kpi-sub">Total Released Work</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Sanctioned Backlog</div>
+          <div class="kpi-value mono" id="kpi-backlog">₹--</div>
+          <div class="kpi-sub">Undisbursed Sanctions</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">National Utilization</div>
+          <div class="kpi-value mono" id="kpi-utilization">--%</div>
+          <div class="kpi-sub" id="kpi-median-sub">Median: --%</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">At-Risk Constituencies</div>
+          <div class="kpi-value mono" id="kpi-risk-count" style="color: var(--accent-rose);">--</div>
+          <div class="kpi-sub" id="kpi-risk-pct">--% of all MPs</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Data Anomalies</div>
+          <div class="kpi-value mono" id="kpi-anomalies">--</div>
+          <div class="kpi-sub" id="kpi-anomaly-detail">-- Inactive | -- Orphans</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">State Utilization Rates</div>
+              <div class="card-desc">Top 5 vs Bottom 5 states by average fund conversion</div>
+            </div>
+          </div>
+          <div class="chart-box">
+            <canvas id="chart-states-bar"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Risk Proportion</div>
+              <div class="card-desc">State-relative median benchmark</div>
+            </div>
+          </div>
+          <div class="chart-box" style="display: flex; align-items: center; justify-content: center;">
+            <canvas id="chart-risk-doughnut" style="max-height: 240px;"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: STATES -->
+    <section id="tab-states" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">State Performance Summary</div>
+            <div class="card-desc">Average utilization, allocated vs disbursed funds across states</div>
+          </div>
+          <input type="text" id="state-search" class="input" placeholder="Search state..." style="width: 200px;" />
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>State / UT</th>
+                <th class="num">MPs</th>
+                <th class="num">Allocated</th>
+                <th class="num">Disbursed</th>
+                <th class="num">Avg Utilization</th>
+                <th class="num">State Median</th>
+                <th class="num">Avg Backlog</th>
+                <th>At-Risk Rate</th>
+              </tr>
+            </thead>
+            <tbody id="states-tbody">
+              <tr><td colspan="8" style="text-align: center; color: var(--text-dim); padding: 24px;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: MP DIRECTORY -->
+    <section id="tab-mps" class="tab-panel">
+      <div class="card">
+        <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div class="card-title">Member of Parliament Directory</div>
+            <div class="card-desc">Constituency fund status and machine-learned completion risk</div>
+          </div>
+          <div class="controls">
+            <input type="text" id="mp-search" class="input" placeholder="Search MP or constituency..." style="min-width: 220px;" />
+            <select id="mp-state-filter" class="select">
+              <option value="All">All States</option>
+            </select>
+            <select id="mp-risk-filter" class="select">
+              <option value="all">All Statuses</option>
+              <option value="at_risk">At Risk Only</option>
+              <option value="on_track">On Track Only</option>
+            </select>
+            <select id="mp-sort" class="select">
+              <option value="utilization_rate:desc">Highest Utilization</option>
+              <option value="utilization_rate:asc">Lowest Utilization</option>
+              <option value="sanctioned_backlog:desc">Highest Backlog</option>
+              <option value="allocated_amount:desc">Highest Allocation</option>
+              <option value="risk_score:desc">Highest Risk Score</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Hon'ble MP</th>
+                <th>State</th>
+                <th>Constituency</th>
+                <th class="num">Allocated</th>
+                <th class="num">Disbursed</th>
+                <th class="num">Utilization</th>
+                <th class="num">Backlog</th>
+                <th class="num">Works (S / C)</th>
+                <th>Risk Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="mps-tbody">
+              <tr><td colspan="10" style="text-align: center; color: var(--text-dim); padding: 24px;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <div id="pagination-label">Showing 0 of 0 MPs</div>
+          <div class="pagination">
+            <button class="btn btn-secondary" id="btn-prev" disabled>Previous</button>
+            <span id="page-num" class="mono">1 / 1</span>
+            <button class="btn btn-secondary" id="btn-next" disabled>Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: CATEGORY GAP -->
+    <section id="tab-categories" class="tab-panel">
+      <div class="callout">
+        <strong>Data Notice:</strong> Category-level disbursed funds exceed sanctioned funds by 2-3x. This is an artifact of rolling multi-year snapshot windows where completed works include projects sanctioned in prior fiscal years outside this dataset's sanction window.
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Sanctioned vs Disbursed by Work Category</div>
+              <div class="card-desc">Normal/Others, Repair & Renovation, Trust & Society</div>
+            </div>
+          </div>
+          <div class="chart-box">
+            <canvas id="chart-categories-bar"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Category Metrics</div>
+              <div class="card-desc">Aggregated amounts</div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th class="num">Sanctioned</th>
+                  <th class="num">Disbursed</th>
+                </tr>
+              </thead>
+              <tbody id="cat-tbody">
+                <tr><td colspan="3" style="text-align: center; padding: 20px;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: RISK SIMULATOR -->
+    <section id="tab-simulator" class="tab-panel">
+      <div class="sim-grid">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Constituency Risk Simulator</div>
+              <div class="card-desc">Test the completion-risk classifier with custom parameters</div>
+            </div>
+            <select id="sim-preset" class="select" style="font-size: 0.78rem;">
+              <option value="">-- Load Preset --</option>
+              <option value="high">High Performer MP</option>
+              <option value="backlog">High Backlog MP</option>
+              <option value="zero">Zero-Activity MP</option>
+              <option value="avg">Moderate MP</option>
+            </select>
+          </div>
+
+          <form id="sim-form" class="form-grid">
+            <div class="field field-full">
+              <label for="sim-state">State / UT</label>
+              <select id="sim-state" class="select" required></select>
+            </div>
+
+            <div class="field">
+              <label for="sim-allocated">Allocated Amount (₹)</label>
+              <input type="number" id="sim-allocated" class="input mono" value="50000000" min="0" step="100000" required />
+              <span class="field-hint" id="hint-alloc">₹5.00 Cr</span>
+            </div>
+
+            <div class="field">
+              <label for="sim-sanctioned-amt">Sanctioned Amount (₹)</label>
+              <input type="number" id="sim-sanctioned-amt" class="input mono" value="35000000" min="0" step="100000" required />
+              <span class="field-hint" id="hint-sanc">₹3.50 Cr</span>
+            </div>
+
+            <div class="field">
+              <label for="sim-sanctioned-cnt">Sanctioned Works Count</label>
+              <input type="number" id="sim-sanctioned-cnt" class="input mono" value="45" min="0" required />
+            </div>
+
+            <div class="field">
+              <label for="sim-disbursed-amt">Disbursed Amount (₹)</label>
+              <input type="number" id="sim-disbursed-amt" class="input mono" value="12000000" min="0" step="100000" required />
+              <span class="field-hint" id="hint-disb">₹1.20 Cr</span>
+            </div>
+
+            <div class="field">
+              <label for="sim-completed-cnt">Completed Works Count</label>
+              <input type="number" id="sim-completed-cnt" class="input mono" value="12" min="0" required />
+            </div>
+
+            <div class="field field-full" style="margin-top: 10px;">
+              <button type="submit" class="btn" id="btn-simulate" style="width: 100%; padding: 10px;">Run Risk Inference</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card result-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Inference Output</div>
+              <div class="card-desc">Supervised classification result</div>
+            </div>
+          </div>
+
+          <div id="sim-placeholder" style="color: var(--text-dim); text-align: center; padding: 40px 10px; font-size: 0.84rem;">
+            Click <strong>Run Risk Inference</strong> to evaluate parameters.
+          </div>
+
+          <div id="sim-result-box" class="d-none">
+            <div class="result-status">
+              <div>
+                <span class="status-tag" id="sim-status-tag">ON TRACK</span>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;" id="sim-status-sub">Tracking with state benchmark</div>
+              </div>
+              <span class="badge" id="sim-badge" style="font-size: 0.8rem;">17.6% Risk</span>
+            </div>
+
+            <div class="prob-meter">
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+                <span>Risk Probability</span>
+                <span id="sim-prob-label" class="mono">17.6%</span>
+              </div>
+              <div class="meter-track">
+                <div class="meter-fill" id="sim-meter" style="width: 17.6%;"></div>
+              </div>
+            </div>
+
+            <div class="stat-row">
+              <div class="stat-item">
+                <div class="label">Utilization</div>
+                <div class="val mono" id="sim-util-val">24.0%</div>
+              </div>
+              <div class="stat-item">
+                <div class="label">State Median</div>
+                <div class="val mono" id="sim-median-val">9.5%</div>
+              </div>
+              <div class="stat-item">
+                <div class="label">Sanction Backlog</div>
+                <div class="val mono" id="sim-backlog-val">₹2.30 Cr</div>
+              </div>
+              <div class="stat-item">
+                <div class="label">Completion Ratio</div>
+                <div class="val mono" id="sim-ratio-val">26.7%</div>
+              </div>
+            </div>
+
+            <div class="factors-box">
+              <h5>Diagnostics</h5>
+              <ul id="sim-factors"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal-overlay d-none" id="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 1.05rem;" id="modal-mp">MP Details</h3>
+          <div style="font-size: 0.78rem; color: var(--text-muted);" id="modal-sub">Constituency</div>
+        </div>
+        <button class="close-btn" id="modal-close">&times;</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
