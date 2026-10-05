@@ -32,7 +32,6 @@ config = {
 }
 
 class DataValidationError(Exception):
-    """Raise this when there is a mismatch of columns and stuff"""
     pass
 
 def load_dataset(config: dict) -> pd.DataFrame:
