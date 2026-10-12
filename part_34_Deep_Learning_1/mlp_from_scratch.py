@@ -60,3 +60,71 @@ def data_processing_pipeline(X_raw: NDArray[np.float64], y_raw: NDArray[np.float
     log(f"Testing metrics shape X: {X_test.shape}, y: {y_test.shape}")
 
     return X_train, X_val, X_test, y_train, y_val, y_test
+
+def relu(Z: NDArray[np.float64]):
+    return np.maximum(0, Z)
+
+def relu_derivative(Z: NDArray[np.float64]):
+    return (Z > 0).astype(np.float64)
+
+def sigmoid(Z: NDArray[np.float64]):
+    Z_clipped = np.clip(Z, -1000, 1000)
+    return 1.0 / (1.0 + np.exp(-Z_clipped))
+
+def sigmoid_derivative(Z: NDArray[np.float64]):
+    A = sigmoid(Z)
+    return A * (1.0 - A)
+
+def linear(Z: NDArray[np.float64]):
+    return Z
+
+def linear_derivative(Z: NDArray[np.float64]):
+    return np.ones_like(Z)
+
+def mse_loss(Y_pred: NDArray[np.float64], Y_true: NDArray[np.float64]) -> Tuple[float, NDArray[np.float64]]:
+    N = Y_pred.shape[0]
+    errors = Y_pred - Y_true
+    
+    loss_val = float(np.mean(errors ** 2))
+    
+    loss_grad = (2.0 / N) * errors
+    
+    return loss_val, loss_grad
+
+ACTIVATIONS = {
+    "relu": relu,
+    "sigmoid": sigmoid,
+    "linear": linear
+}
+
+DERIVATIVES = {
+    "relu_derivative": relu_derivative,
+    "sigmoid_derivative": sigmoid_derivative,
+    "linear_derivative": linear_derivative
+}
+
+class DenseLayer:
+    def __init__(self, in_features: int, out_features: int, activation_str: str, rng: np.random.Generator):
+        self.activation_str = activation_str
+
+        if self.activation_str == "relu":
+            std = np.sqrt(2.0/in_features)
+        else:
+            std = np.sqrt(1.0/in_features)
+
+        self.weight = rng.standard_normal(size=(in_features, out_features)) * std
+        self.bias = np.zeros((1, out_features))
+
+    def forward(self, A_prev: NDArray[np.float64]) -> NDArray[np.float64]:
+        self.A_prev = A_prev
+        self.Z =  A_prev @ self.weight  + self.bias
+        return ACTIVATIONS[self.activation_str](self.Z)
+
+    def backward(self, dA: NDArray[np.float64]) -> NDArray[np.float64]:
+        dZ = dA * DERIVATIVES[self.activation_str](self.Z)
+        self.dW = self.A_prev.T @ dZ
+        self.db = np.sum(dZ, axis=0, keepdims=True)
+        dA_prev = dZ @ self.weight.T
+        return dA_prev
+
+    
